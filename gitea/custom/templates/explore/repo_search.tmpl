@@ -1,10 +1,10 @@
 <div class="ui right floated secondary filter menu">
     <!-- Sort -->
     <div class="ui right dropdown type jump item">
-		<span class="text">
-			{{.i18n.Tr "repo.issues.filter_sort"}}
+    <span class="text">
+      {{.i18n.Tr "repo.issues.filter_sort"}}
                 <i class="dropdown icon"></i>
-		</span>
+    </span>
         <div class="menu">
             <a class="{{if eq .SortType "newest"}}active{{end}} item" href="{{$.Link}}?sort=newest&q={{$.Keyword}}&tab={{$.TabName}}">{{.i18n.Tr "repo.issues.filter_sort.latest"}}</a>
             <a class="{{if eq .SortType "oldest"}}active{{end}} item" href="{{$.Link}}?sort=oldest&q={{$.Keyword}}&tab={{$.TabName}}">{{.i18n.Tr "repo.issues.filter_sort.oldest"}}</a>

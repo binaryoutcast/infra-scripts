@@ -1,12 +1,12 @@
 <div class="tab-size-8 non-diff-file-content">
 
-	<h4 class="ui top attached header" id="repo-read-file">
-		<div class="ui stackable grid">
-			<div class="eight wide column">
+  <h4 class="ui top attached header" id="repo-read-file">
+    <div class="ui stackable grid">
+      <div class="eight wide column">
                 <i class="file text outline icon ui left"></i>
                 <strong>{{.FileName}}</strong> <span class="text grey normal">{{FileSize .FileSize}}{{if .IsLFSFile}} ({{.i18n.Tr "repo.stored_lfs"}}){{end}}</span>
-			</div>
-			<div class="eight wide right aligned column">
+      </div>
+      <div class="eight wide right aligned column">
                 <div class="ui right file-actions">
                     <div class="ui buttons">
                         <a class="ui button" href="{{EscapePound $.RawFileLink}}">{{.i18n.Tr "repo.file_raw"}}</a>
@@ -29,9 +29,9 @@
                         {{end}}
                     {{end}}
                 </div>
-			</div>
-		</div>
-	</h4>
+      </div>
+    </div>
+  </h4>
 
     <div class="ui attached table unstackable segment">
         <div class="file-view code-view">
