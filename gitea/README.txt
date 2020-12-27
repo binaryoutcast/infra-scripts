@@ -6,4 +6,4 @@ Custom Template File Changes
 - templates/repo/view_list.tmpl
   - [91b5e79] Improve style of latest commit row on repo main page
 - templates/repo/commits_list.tmpl
-  - [866c622] [Gitea] Make commits list more github-like
+  - [866c622] Make commits list more github-like
