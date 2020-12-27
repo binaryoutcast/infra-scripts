@@ -1,0 +1,9 @@
+User-agent: *
+Disallow: /api/*
+Disallow: /*/*/commit/
+Disallow: /*/*/commits/
+Disallow: /*/*/src/
+Disallow: /*/*/compare/
+Disallow: /*/*/archive/
+Disallow: /*/*/pulls/
+Disallow: /*/*/labels/
