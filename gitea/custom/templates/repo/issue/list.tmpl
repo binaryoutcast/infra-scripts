@@ -219,10 +219,6 @@
             {{end}}
           {{end}}
 
-          {{range .Labels}}
-            <a class="ui label" href="{{$.Link}}?q={{$.Keyword}}&type={{$.ViewType}}&state={{$.State}}&labels={{.ID}}&milestone={{$.MilestoneID}}&assignee={{$.AssigneeID}}" style="color: {{.ForegroundColor}}; background-color: {{.Color}}" title="{{.Description | RenderEmojiPlain}}">{{.Name | RenderEmoji}}</a>
-          {{end}}
-
           {{if .NumComments}}
             <span class="comment ui right">{{svg "octicon-comment" 16}} {{.NumComments}}</span>
           {{end}}
@@ -265,7 +261,7 @@
             {{end}}
             {{range .Assignees}}
               <a class="ui right assignee poping up" href="{{.HomeLink}}" data-content="{{.Name}}" data-variation="inverted" data-position="left center">
-                <img class="ui avatar image" src="{{.RelAvatarLink}}">
+                <img class="ui avatar image img-11" src="{{.RelAvatarLink}}">
               </a>
             {{end}}
             {{if .IsPull}}
@@ -295,6 +291,13 @@
               {{end}}
             {{end}}
           </p>
+          {{if .Labels}}
+          <p class="mcIssueTags">
+            {{range .Labels}}
+              <a class="ui label" href="{{$.Link}}?q={{$.Keyword}}&type={{$.ViewType}}&state={{$.State}}&labels={{.ID}}&milestone={{$.MilestoneID}}&assignee={{$.AssigneeID}}" style="color: {{.ForegroundColor}}; background-color: {{.Color}}" title="{{.Description | RenderEmojiPlain}}">{{.Name | RenderEmoji}}</a>
+            {{end}}
+          </p>
+          {{end}}
         </li>
       {{end}}
 
