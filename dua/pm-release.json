@@ -1,0 +1,7 @@
+{
+  "spotify.com": "Mozilla\\/5.0 \\((.+?) rv:.*#Mozilla/5.0 ($1 rv:4.8) Goanna/20210402 PaleMoon/29.1.1",
+  "kroger.com": "Mozilla\\/5.0 \\((.+?) rv:.*#Mozilla/5.0 ($1 rv:86.0) Gecko/20100101 Firefox/86.0 (Pale Moon)",
+  "twitter.com": "Mozilla\\/5.0 \\((.+?) rv:.*#Mozilla/5.0 ($1 rv:4.8) Goanna/20210402 PaleMoon/29.1.1",
+  "mewe.com": "Mozilla\\/5.0 \\((.+?) rv:.*#Mozilla/5.0 ($1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36",
+  "testserver.palemoon.org": "Mozilla\\/5.0 \\((.+?) rv:.*#Mozilla/5.0 ($1 rv:60.0) Gecko/20100101 Firefox/60.0 PaleMoon/28.17.0 (dua)"
+}
