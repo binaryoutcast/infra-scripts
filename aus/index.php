@@ -14,7 +14,7 @@ define('ROOT_PATH', $_SERVER['DOCUMENT_ROOT']);
 
 // We don't actually need a version number except while the script is git controlled it is not sourced directly from
 // a git repo so this is purely for tracking if the version on the server is up to date.
-const VERSION               = '2.0.2';
+const VERSION               = '2.0.3';
 
 const NEW_LINE              = "\n";
 const EMPTY_STRING          = "";
@@ -26,7 +26,7 @@ const DASH                  = "-";
 const WILDCARD              = "*";
 
 const APPLICATIONS          = ['palemoon', 'basilisk'];
-const UPDATE_CHANNELS       = ['release', 'beta', 'unstable'];
+const UPDATE_CHANNELS       = ['release', 'beta'];
 /*
 const WIDGET_TOOLKITS       = ['windows', 'cocoa', 'gtk2', 'gtk3'];
 const FLAVORS               = ['illumos'];
@@ -311,6 +311,11 @@ function gfGenerateUpdateXML() {
     $update['{%DETAILS_URL}'] = str_replace('releasenotes.shtml',
                                             $gaRuntime['reqChannel'] . SLASH . 'releasenotes.shtml',
                                             $update['{%DETAILS_URL}']);
+  }
+
+  // Hack for forcing Pale Moon unstable channel back to release
+  if ($gaRuntime['reqApplication'] == 'palemoon' && $gaRuntime['reqVersion'] == '29.5.0a1') {
+    $update['{%VERSION}'] = '29.6.0a1';
   }
 
   // Basilisk isn't on Pale Moon's domain but the paths are the same so just replace the domain
