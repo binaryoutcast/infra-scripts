@@ -282,7 +282,7 @@ if (!function_exists('str_contains')) {
 *
 * @returns          XML or error
 **********************************************************************************************************************/
-function gfGenerateUpdateXML($aOverrideAppVersion = null) {
+function gfGenerateUpdateXML() {
   global $gaRuntime;
 
   // Read the package json
@@ -297,27 +297,25 @@ function gfGenerateUpdateXML($aOverrideAppVersion = null) {
   
   // Prepare the substs for the update xml
   $update = array(
-    '{%VERSION}'            => $manifest['moz_app_version'],
-    '{%BUILD_ID}'           => $manifest['buildid'],
-    '{%EXTENSION_VERSION}'  => $manifest['moz_app_version'],
-    '{%DISPLAY_VERSION}'    => $manifest['moz_app_version'],
-    '{%DETAILS_URL}'        => 'http://www.palemoon.org/releasenotes.shtml',
-    '{%PATCH_URL}'          => 'http://aus.palemoon.org/' . $gaRuntime['reqChannel'] . SLASH . $patchFile,
-    '{%PATCH_HASH}'         => hash_file('sha256', $gaRuntime['channelPath'] . $patchFile),
-    '{%PATCH_SIZE}'         => filesize($gaRuntime['channelPath'] . $patchFile),
+    '{%VERSION}'          => $manifest['moz_app_version'],
+    '{%BUILD_ID}'         => $manifest['buildid'],
+    '{%DISPLAY_VERSION}'  => $manifest['moz_app_version'],
+    '{%DETAILS_URL}'      => 'http://www.palemoon.org/releasenotes.shtml',
+    '{%PATCH_URL}'        => 'http://aus.palemoon.org/' . $gaRuntime['reqChannel'] . SLASH . $patchFile,
+    '{%PATCH_HASH}'       => hash_file('sha256', $gaRuntime['channelPath'] . $patchFile),
+    '{%PATCH_SIZE}'       => filesize($gaRuntime['channelPath'] . $patchFile),
   );
-
-  // Override Application Version (force update)
-  if ($aOverrideAppVersion) {
-    $update['{%VERSION}'] = $aOverrideAppVersion;
-    $update['{%EXTENSION_VERSION}'] = $aOverrideAppVersion;
-  }
 
   // Not-Release channels for Pale Moon have relnotes elsewhere
   if ($gaRuntime['reqApplication'] == 'palemoon' && $gaRuntime['reqChannel'] != 'release') {
     $update['{%DETAILS_URL}'] = str_replace('releasenotes.shtml',
                                             $gaRuntime['reqChannel'] . SLASH . 'releasenotes.shtml',
                                             $update['{%DETAILS_URL}']);
+  }
+
+  // Hack for forcing Pale Moon unstable channel back to release
+  if ($gaRuntime['reqApplication'] == 'palemoon' && $gaRuntime['reqVersion'] == '29.5.0a1') {
+    $update['{%VERSION}'] = '29.6.0a1';
   }
 
   // Basilisk isn't on Pale Moon's domain but the paths are the same so just replace the domain
@@ -334,7 +332,7 @@ function gfGenerateUpdateXML($aOverrideAppVersion = null) {
   <update type="major" 
           appVersion="{%VERSION}"
           buildID="{%BUILD_ID}"
-          extensionVersion="{%EXTENSION_VERSION}"
+          extensionVersion="{%VERSION}"
           displayVersion="{%DISPLAY_VERSION}"
           detailsURL="{%DETAILS_URL}">
     <patch type="complete"
@@ -537,12 +535,7 @@ if (!file_exists($gvXMLFile)) {
 }
 elseif (file_exists($gvXMLFile)) {
   if (!file_exists($gvTEMPFile)) {
-    if ($gaRuntime['reqApplication'] == 'palemoon' && $gaRuntime['reqVersion'] == '29.5.0a1') {
-      $gaRuntime['patchXML'] = gfGenerateUpdateXML('29.6.0a1');
-    }
-    else {
-      $gaRuntime['patchXML'] = gfReadFile($gvXMLFile);
-    }
+    $gaRuntime['patchXML'] = gfReadFile($gvXMLFile);
 
     // Set some status
     $gaRuntime['patchXMLWritten'] = false;
