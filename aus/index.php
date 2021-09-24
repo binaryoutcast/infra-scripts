@@ -14,7 +14,7 @@ define('ROOT_PATH', $_SERVER['DOCUMENT_ROOT']);
 
 // We don't actually need a version number except while the script is git controlled it is not sourced directly from
 // a git repo so this is purely for tracking if the version on the server is up to date.
-const VERSION               = '2.0.3';
+const VERSION               = '2.0.4';
 
 const NEW_LINE              = "\n";
 const EMPTY_STRING          = "";
@@ -313,11 +313,6 @@ function gfGenerateUpdateXML() {
                                             $update['{%DETAILS_URL}']);
   }
 
-  // Hack for forcing Pale Moon unstable channel back to release
-  if ($gaRuntime['reqApplication'] == 'palemoon' && $gaRuntime['reqVersion'] == '29.5.0a1') {
-    $update['{%VERSION}'] = '29.6.0a1';
-  }
-
   // Basilisk isn't on Pale Moon's domain but the paths are the same so just replace the domain
   // Also fix up the displayVersion
   if ($gaRuntime['reqApplication'] == 'basilisk') {
@@ -379,6 +374,7 @@ $gaRuntime = array(
   'patchXMLName'        => null,
   'patchXMLWritten'     => null,
   'patchXML'            => null,
+  'forceVersion'        => null,
 );
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -394,7 +390,7 @@ foreach (['NT 5', 'NT 6.0', 'curl/', 'wget/'] as $_value) {
 
 // We need AT LEAST these to provide an update
 if (!$gaRuntime['reqApplication'] || !$gaRuntime['reqBuildTarget']) {
-  gfError('Insufficent query arguments');
+  gfError('Insufficient query arguments');
 }
 
 // Knock the following to lowercase
@@ -418,6 +414,11 @@ if (!in_array($gaRuntime['reqApplication'], APPLICATIONS)) {
 }
 
 // --------------------------------------------------------------------------------------------------------------------
+
+// Hack to allow Pale Moon Unstable to update to release.
+if ($gaRuntime['reqApplication'] == 'palemoon' && $gaRuntime['reqChannel'] == 'unstable') {
+  $gaRuntime['forceVersion'] = '29.6.0a1';
+}
 
 // If the update channel is unknown then assume release
 if (!in_array($gaRuntime['reqChannel'], UPDATE_CHANNELS)) {
@@ -467,17 +468,11 @@ $gvTEMPFile = $gaRuntime['channelPath'] . $gaRuntime['patchXMLName'] . TEMP_EXTE
 
 // Now we have fun.. Like last time we want to read a cached xml response and spit it out.
 // However, if there is no cached response we need to generate it in a way that will pretty much eliminate
-// the possiblity of multiple requests trying to write and read files at the same time. 
+// the possibility of multiple requests trying to write and read files at the same time. 
 if (!file_exists($gvXMLFile)) {
   if (!file_exists($gvTEMPFile)) {
-    // Build the inital package name used as a glob
-    if ($gaRuntime['reqApplication'] == 'palemoon' && $gaRuntime['reqChannel'] == 'unstable') {
-      // Pale Moon Unstables have a special case
-      $gaRuntime['packageName'] = 'palemoon-unstable-latest' . DOT . $gaRuntime['packageTarget'];
-    }
-    else {
-      $gaRuntime['packageName'] = $gaRuntime['reqApplication'] . DASH . WILDCARD . DOT . $gaRuntime['packageTarget'];
-    }
+    // Build the initial package name used as a glob
+    $gaRuntime['packageName'] = $gaRuntime['reqApplication'] . DASH . WILDCARD . DOT . $gaRuntime['packageTarget'];
 
     // If we have a flavor then append it to the package name
     if ($gaRuntime['reqFlavor']) {
@@ -542,6 +537,14 @@ elseif (file_exists($gvXMLFile)) {
     $gaRuntime['packageManifest'] = null;
     $gaRuntime['packagePatch'] = null;
   }
+}
+
+// --------------------------------------------------------------------------------------------------------------------
+
+// If we are to force a version number we need to modify the patch xml
+if ($gaRuntime['forceVersion']) {
+  $gaRuntime['patchXML'] = preg_replace("/appVersion\=\"(.*)\"/", 'appVersion="' . $gaRuntime['forceVersion'] . '"', $gaRuntime['patchXML']);
+  $gaRuntime['patchXML'] = preg_replace("/extensionVersion\=\"(.*)\"/", 'extensionVersion="' . $gaRuntime['forceVersion'] . '"', $gaRuntime['patchXML']);
 }
 
 // --------------------------------------------------------------------------------------------------------------------
