@@ -14,7 +14,7 @@ define('ROOT_PATH', $_SERVER['DOCUMENT_ROOT']);
 
 // We don't actually need a version number except while the script is git controlled it is not sourced directly from
 // a git repo so this is purely for tracking if the version on the server is up to date.
-const VERSION               = '2.0.4';
+const VERSION               = '2.0.5';
 
 const NEW_LINE              = "\n";
 const EMPTY_STRING          = "";
@@ -33,17 +33,12 @@ const FLAVORS               = ['illumos'];
 */
 
 const BUILD_TARGETS = array(
-  'winnt_x86-msvc'          => 'win32', // Tycho and Older and >= 28.9.0
-  'winnt_x86-msvc-x86'      => 'win32', // 28.0.0-28.8.4 (VS2015 32-on-32)
-  'winnt_x86-msvc-x64'      => 'win32', // 28.0.0-28.8.4 (VS2015 32-on-64)
-  'winnt_x86_64-msvc'       => 'win64', // Tycho and Older and >= 28.9.0
-  'winnt_x86_64-msvc-x64'   => 'win64', // 28.0.0-28.8.4 (VS2015 64-on-64)
+  'winnt_x86-msvc'          => 'win32',
+  'winnt_x86_64-msvc'       => 'win64',
   'linux_x86-gcc3'          => 'linux-i686',
   'linux_x86_64-gcc3'       => 'linux-x86_64',
-  'sunos_x86-gcc3'          => 'solaris2.11-i386',
-  'sunos_x86_64-gcc3'       => 'solaris2.11-x86_64',
-//'darwin_x86-gcc3'         => 'mac32',
-//'darwin_x86_64-gcc3'      => 'mac64',
+  'sunos_x86-gcc3'          => 'sunos-i386',
+  'sunos_x86_64-gcc3'       => 'sunos-x86_64',
 );
 
 const JSON_EXTENSION        = DOT . 'json';
