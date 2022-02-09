@@ -14,7 +14,7 @@ define('ROOT_PATH', $_SERVER['DOCUMENT_ROOT']);
 
 // We don't actually need a version number except while the script is git controlled it is not sourced directly from
 // a git repo so this is purely for tracking if the version on the server is up to date.
-const VERSION               = '2.0.5';
+const VERSION               = '2.1.0';
 
 const NEW_LINE              = "\n";
 const EMPTY_STRING          = "";
@@ -25,7 +25,7 @@ const SLASH                 = "/";
 const DASH                  = "-";
 const WILDCARD              = "*";
 
-const APPLICATIONS          = ['palemoon', 'basilisk'];
+const APPLICATIONS          = ['palemoon'];
 const UPDATE_CHANNELS       = ['release', 'beta'];
 /*
 const WIDGET_TOOLKITS       = ['windows', 'cocoa', 'gtk2', 'gtk3'];
@@ -308,14 +308,6 @@ function gfGenerateUpdateXML() {
                                             $update['{%DETAILS_URL}']);
   }
 
-  // Basilisk isn't on Pale Moon's domain but the paths are the same so just replace the domain
-  // Also fix up the displayVersion
-  if ($gaRuntime['reqApplication'] == 'basilisk') {
-    $update['{%DISPLAY_VERSION}'] = substr($manifest['moz_app_version'], 5);
-    $update['{%DETAILS_URL}']     = str_replace('palemoon', 'basilisk-browser', $update['{%DETAILS_URL}']);
-    $update['{%PATCH_URL}']       = str_replace('palemoon', 'basilisk-browser', $update['{%PATCH_URL}']);
-  }
-
   // The Update XML Template
   $xml = XML_TAG . NEW_LINE .
 '<updates>
@@ -435,7 +427,7 @@ else {
 }
 
 // If widget or flavor is not specificed for linux we should assume gtk2
-if (str_starts_with($gaRuntime['reqBuildTarget'], 'linux') && $gaRuntime['reqApplication'] != 'basilisk') {
+if (str_starts_with($gaRuntime['reqBuildTarget'], 'linux')) {
   if (!$gaRuntime['reqWidgetToolkit']) {
     $gaRuntime['reqWidgetToolkit'] = 'gtk2';
   }
