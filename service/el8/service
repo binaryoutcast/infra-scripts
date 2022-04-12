@@ -90,6 +90,12 @@ elif [ -n "${ACTION}" ] && [ -x "${ACTIONDIR}/${SERVICE}/${ACTION}" ]; then
    env -i PATH="$PATH" TERM="$TERM" SYSTEMCTL_IGNORE_DEPENDENCIES="${SYSTEMCTL_IGNORE_DEPENDENCIES}" SYSTEMCTL_SKIP_REDIRECT="${SYSTEMCTL_SKIP_REDIRECT}" "${ACTIONDIR}/${SERVICE}/${ACTION}" ${OPTIONS}
 elif `echo $ACTION | grep -Eqw "start|stop|restart|try-restart|reload|force-reload|status|condrestart"` ; then
   SERVICE_MANGLED=$(/usr/bin/systemd-escape --mangle "${SERVICE}")
+
+  if [ "${ACTION}" == "status" ]; then
+    exec /bin/systemctl "${ACTION}" "${SERVICE_MANGLED}"
+    exit 0
+  fi
+
   /bin/systemctl "${ACTION}" "${SERVICE_MANGLED}" ${OPTIONS} 2> /dev/null
    
   SYSTEMCTL_EXITCODE=${?}
@@ -130,9 +136,7 @@ elif `echo $ACTION | grep -Eqw "start|stop|restart|try-restart|reload|force-relo
       elif [ "${ACTION}" == "condrestart" ]; then
         echo -e "${SERVICE_STATUSCODE[0]} ${SERVICE_OKMESSAGE[6]} ${SERVICE}"
       else
-        if [ ${ACTION} != "status" ]; then
-          echo -e "${SERVICE_STATUSCODE[0]} ${SERVICE}"
-        fi
+        echo -e "${SERVICE_STATUSCODE[0]} ${SERVICE}"
       fi
   elif [ ${SYSTEMCTL_EXITCODE} -eq 4 ] || [ ${SYSTEMCTL_EXITCODE} -eq 5 ]; then
     echo -e "${SERVICE_FAILEDMESSAGE[1]}"
