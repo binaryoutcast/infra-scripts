@@ -1,0 +1,235 @@
+# Application
+_BUILD_APP=navigator
+
+# Type of branding and mar channel
+_BUILD_BRANDING=trunk
+
+# Build the updater, if so set to 1?
+_BUILD_UPDATER=
+
+# GTK major version number desired
+# You do not have to blank this on Windows
+# Solaris ignores this and uses GTK3
+# Obviously Windows and Mac are not affected by this
+_GTK_VERSION=2
+
+# Set this to build for Solaris
+# Obviously other platforms aren't affected by this
+_BUILD_ILLUMOS=
+
+# These are specific optimizations for private BinOC Builds - Leave this clear
+# Also, only applies to Win64 builds
+_BINOC_OPTZ=
+
+# =====================================================================================================================
+
+# General Build Options
+mk_add_options MOZ_MAKE_FLAGS="-j6"
+mk_add_options AUTOCLOBBER=1
+ac_add_options --enable-official-vendor
+ac_add_options --enable-jemalloc
+ac_add_options --enable-strip
+ac_add_options --disable-debug
+ac_add_options --disable-tests
+#ac_add_options --enable-new-regexp
+export MOZILLA_OFFICIAL=1
+
+# =====================================================================================================================
+
+# Objdir Prefix
+# If you don't want or don't know what to set this to then using a single dot
+_BUILD_OBJ_PREFIX=../.obj
+
+# Force a specific object dir instead of the BinOC one
+_BUILD_OBJ_FORCE=$_BUILD_OBJ_PREFIX/$_BUILD_APP-$BINOC_CONFIG_GUESS
+
+# =====================================================================================================================
+
+# Things that we try to guess from binoc-central's mach stub
+# Pay attention to _BUILD_OS and _BUILD_64 if it suits you
+
+# Current OS - $BINOC_SYSTEM is exported from the mach stub
+if [ -n "$BINOC_SYSTEM" ]; then 
+  _BUILD_OS=$BINOC_SYSTEM
+else
+  # If you are not using binoc-central or want to use client.mk directly
+  # set this to windows, linux, sunos
+  _BUILD_OS=windows
+fi
+
+# Is this a 64bit build?
+if [ $_BUILD_OS == "windows" ]; then
+  if [ "$PLATFORM" == "X64" ]; then
+    _BUILD_64=1
+  else
+    _BUILD_64=
+  fi
+else
+  # If not on Windows then please set this properly
+  _BUILD_64=1
+fi
+
+# This is used as part of the obj dir path construction
+# Don't worry about it...
+if [ -z "$BINOC_CONFIG_GUESS" ]; then
+  BINOC_CONFIG_GUESS=build
+fi
+
+# =====================================================================================================================
+
+# OS and arch options
+if [ "$_BUILD_OS" = "windows" ]; then
+  _BUILD_OPTZ="-O2 -GS-"
+  
+  if [ -n "$_BUILD_64" ]; then
+    _BUILD_OPTZ="${_BUILD_OPTZ} -favor:AMD64"
+    
+    if [ -n "$_BINOC_OPTZ" ]; then
+      _BUILD_OPTZ="${_BUILD_OPTZ} -arch:AVX2 -GLTs -fp:precise -Qfast_transcendentals -Qpar"
+    fi
+
+    WIN32_REDIST_DIR=$VCINSTALLDIR/redist/x64/Microsoft.VC140.CRT
+    WIN_UCRT_REDIST_DIR=$UNIVERSALCRTSDKDIR/Redist/$WINDOWSSDKVERSION/ucrt/DLLs/x64
+  else
+    WIN32_REDIST_DIR=$VCINSTALLDIR/redist/x86/Microsoft.VC140.CRT
+    WIN_UCRT_REDIST_DIR=$UNIVERSALCRTSDKDIR/Redist/$WINDOWSSDKVERSION/ucrt/DLLs/x86
+  fi
+
+  ac_add_options --enable-optimize="${_BUILD_OPTZ}"
+elif [ "$_BUILD_OS" == "linux" ]; then
+  ac_add_options --enable-optimize="-O2 -msse2 -mfpmath=sse -w"
+  ac_add_options --with-pthreads
+  ac_add_options --enable-default-toolkit=cairo-gtk$_GTK_VERSION
+
+  if [ -n "$_BUILD_64" ]; then
+    ac_add_options --x-libraries=/usr/lib64
+  else
+    ac_add_options --x-libraries=/usr/lib
+  fi
+  export MOZ_PKG_SPECIAL=gtk$_GTK_VERSION
+elif [ "$_BUILD_OS" == "sunos" ]; then
+  ac_add_options --enable-optimize="-O2 -msse2 -mfpmath=sse -w"
+  ac_add_options --with-toolchain-prefix=g
+  ac_add_options --with-pthreads
+  ac_add_options --enable-default-toolkit=cairo-gtk3
+
+  if [ -n "$_BUILD_64" ]; then
+    ac_add_options --libdir=/usr/lib/amd64
+    ac_add_options --x-libraries=/usr/lib/amd64
+    export PKG_CONFIG_PATH=/usr/lib/amd64/pkgconfig
+  else
+    ac_add_options --x-libraries=/usr/lib
+  fi
+
+  if [ -n "$_BUILD_ILLUMOS" ]; then
+    export MOZ_PKG_SPECIAL=illumos
+  fi
+fi
+
+# =====================================================================================================================
+
+if [ "$_BUILD_APP" == "js" ]; then
+  ac_add_options --enable-application=platform/$_BUILD_APP
+else
+  ac_add_options --enable-application=$_BUILD_APP
+fi
+
+
+# =====================================================================================================================
+
+# Object Directory
+if [ -n "$_BUILD_OBJ_FORCE" ] && [ "$_BUILD_BRANDING" != "release" ]; then
+  mk_add_options MOZ_OBJDIR=$_BUILD_OBJ_FORCE
+else
+  if [ "$_BUILD_OS" == "linux" ]; then
+    mk_add_options MOZ_OBJDIR=$_BUILD_OBJ_PREFIX/$BINOC_GIT_BRANCH/$_BUILD_APP-$BINOC_CONFIG_GUESS-gtk$_GTK_VERSION
+  else
+    mk_add_options MOZ_OBJDIR=$_BUILD_OBJ_PREFIX/$BINOC_GIT_BRANCH/$_BUILD_APP-$BINOC_CONFIG_GUESS 
+  fi
+fi
+
+# =====================================================================================================================
+
+# General Application Options
+if [ "$_BUILD_APP" == "browser" ] || [ "$_BUILD_APP" == "navigator" ]; then
+  ac_add_options --enable-av1
+fi
+
+if [ "$_BUILD_APP" == "browser" ] ||
+   [ "$_BUILD_APP" == "navigator" ] ||
+   [ "$_BUILD_APP" == "mail" ]; then
+  ac_add_options --disable-necko-wifi
+  ac_add_options --disable-accessibility
+  if [ "$_BUILD_OS" == "windows" ]; then
+    ac_add_options --disable-parental-controls
+  fi
+fi
+
+if [ "$_BUILD_APP" = "navigator" ] || [ "$_BUILD_APP" == "mail" ]; then
+  ac_add_options --disable-jetpack
+  ac_add_options --disable-devtools-server
+  ac_add_options --disable-devtools
+fi
+
+# =====================================================================================================================
+
+# Application Branding
+if [ -n "$_BUILD_BRANDING" ] && [ "$_BUILD_APP" != "js" ]; then
+  if [ "$_BUILD_BRANDING" = "official" ]; then
+    _BUILD_BRANDING=release
+  fi
+
+  if [ "$_BUILD_BRANDING" == "release" ]; then
+    ac_add_options --enable-official-branding
+  else
+    if [ "$_BUILD_APP" == "browser" ]; then
+      if [ "$_BUILD_BRANDING" = "trunk" ]; then
+        _BUILD_BRANDING=unstable
+      fi
+
+      ac_add_options --with-branding=other-licenses/branding/palemoon/$_BUILD_BRANDING
+    else
+      if [ "$_BUILD_BRANDING" = "unstable" ]; then
+        _BUILD_BRANDING=trunk
+      fi
+
+      if [ "$_BUILD_APP" == "navigator" ]; then
+        ac_add_options --with-branding=other-licenses/branding/borealis/$_BUILD_BRANDING
+      elif [ "$_BUILD_APP" == "mail" ]; then
+        ac_add_options --with-branding=other-licenses/branding/interlink/$_BUILD_BRANDING
+      else
+        ac_add_options --with-branding=$_BUILD_APP/branding/$_BUILD_BRANDING
+      fi
+    fi
+  fi
+fi
+
+# Automatic Update Service
+if [ -n "$_BUILD_UPDATER" ]; then
+  ac_add_options --enable-updater
+  if [ -n "$_BUILD_BRANDING" ]; then
+    ac_add_options --enable-update-channel=$_BUILD_BRANDING
+  fi
+else
+  ac_add_options --disable-updater
+fi
+
+# =====================================================================================================================
+
+# Unset local vars so they don't get passed to the environment
+unset _BUILD_UPDATER
+unset _BUILD_64
+unset _BUILD_APP
+unset _GTK_VERSION
+unset _BUILD_OBJ_PREFIX
+unset _BUILD_OS
+unset _BUILD_OPTZ
+unset _BINOC_OPTZ
+unset BINOC_CONFIG_GUESS
+unset _BUILD_BRANDING
+unset _BUILD_ILLUMOS
+unset _BUILD_UNSET_VARS
+
+
+# =====================================================================================================================
+
