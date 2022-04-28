@@ -60,7 +60,7 @@ else
   _OBJDIR=$_OBJDIR-gtk$_GTK
 
   ac_add_options --with-pthreads
-  ac_add_options --enable-default-toolkit=cairo-gtk$_GTK_VERSION
+  ac_add_options --enable-default-toolkit=cairo-gtk$_GTK
 
   if [ -n "$_X64" ]; then
     ac_add_options --x-libraries=/usr/lib64
