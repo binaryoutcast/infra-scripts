@@ -2,7 +2,7 @@
 _APP=navigator
 
 # Branding to use (if not specified in the logic of this mozconfig it will be app/branding/branddir
-_BRANDING=trunk
+_BRANDING=release
 
 # Enable the updater
 _UPDATER=
@@ -94,12 +94,10 @@ ac_add_options --enable-jemalloc
 ac_add_options --enable-strip
 ac_add_options --enable-av1
 ac_add_options --disable-tests
-ac_add_options --disable-jetpack
-ac_add_options --disable-devtools-server
-ac_add_options --disable-devtools
 ac_add_options --disable-necko-wifi
-ac_add_options --disable-accessibility
 ac_add_options --disable-parental-controls
+ac_add_options --enable-chrome-format=omni
+ac_add_options --enable-chrome-compression=none
 
 export MOZILLA_OFFICIAL=1
 
@@ -111,9 +109,9 @@ if [ -n "$_BRANDING" ] && [ "$_APP" != "js" ]; then
     ac_add_options --enable-official-branding
   else
     if [ "$_APP" == "apps/navigator" ]; then
-      ac_add_options --with-branding=other-licenses/branding/borealis/$_BRANDING
+      ac_add_options --with-branding=other-licenses/branding/borealis
     elif [ "$_APP" == "apps/mail" ]; then
-      ac_add_options --with-branding=other-licenses/branding/interlink/$_BRANDING
+      ac_add_options --with-branding=other-licenses/branding/interlink
     else
       ac_add_options --with-branding=$_APP/branding/$_BRANDING
     fi
@@ -132,7 +130,7 @@ fi
 
 # =====================================================================================================================
 
-# Unset our vars as to not polute the build env
+# Unset our vars as to not pollute the build env
 unset _APP
 unset _BRANDING
 unset _UPDATER
