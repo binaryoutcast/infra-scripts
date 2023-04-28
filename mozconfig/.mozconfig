@@ -11,11 +11,9 @@ _UPDATER=
 _DEBUG=
 
 # Number of processes to spawn when compiling. BinOC normally has number of cores (or threads) minus two
-_CORES=8
+_CORES=10
 
-# If the build is for 64bit or not. Windows is determined automatically using values from bash-mach
-# Other target operating systems will need to specify this.
-# If you are using client.mk directly you may want to pick a different solution for your mozconfig file.
+# 64-bit target
 _X64=1
 
 # GTK Version (2 or 3)
@@ -30,30 +28,32 @@ _BINOC_OPTZ=
 # =====================================================================================================================
 
 # Get Target OS and the Config Guess value from bash-mach
-_TARGET_OS=$BINOC_TARGET_OS
-_CONFIG_GUESS=$BINOC_CONFIG_GUESS
+_TARGET_OS=$XMACH_TARGET_OS
+_CONFIG_GUESS=@CONFIG_GUESS@
 
 # Construct the path for the objdir
 _OBJDIR=$_OBJDIR_PREFIX/$_APP-$_CONFIG_GUESS
 
 # This sets basic per-targetos options
-if [ "$_TARGET_OS" == "windows" ]; then
+if [ "$_TARGET_OS" == "winnt" ]; then
   _OPTZ="-O2 -GS-"
 
-  if [ "$PLATFORM" == "X64" ]; then
-    _X64=1
+  if [ -n "$_X64" ]; then
     _OPTZ="${_OPTZ} -favor:AMD64 -fp:precise -Qfast_transcendentals -Qpar"
 
     if [ -n "$_BINOC_OPTZ" ]; then
       _OPTZ="${_OPTZ} -GLTs -arch:AVX2"
     fi
 
-    WIN32_REDIST_DIR=$VCINSTALLDIR/redist/x64/Microsoft.VC140.CRT
-    WIN_UCRT_REDIST_DIR=$UNIVERSALCRTSDKDIR/Redist/$WINDOWSSDKVERSION/ucrt/DLLs/x64
+    ac_add_options --target=x86_64-pc-mingw32
+    ac_add_options --host=x86_64-pc-mingw32
+
+    #WIN32_REDIST_DIR=$VCINSTALLDIR/redist/x64/Microsoft.VC140.CRT
+    #WIN_UCRT_REDIST_DIR=$UNIVERSALCRTSDKDIR/Redist/$WINDOWSSDKVERSION/ucrt/DLLs/x64
   else
-    _X64=
-    WIN32_REDIST_DIR=$VCINSTALLDIR/redist/x86/Microsoft.VC140.CRT
-    WIN_UCRT_REDIST_DIR=$UNIVERSALCRTSDKDIR/Redist/$WINDOWSSDKVERSION/ucrt/DLLs/x86
+    echo "No Redist"
+    #WIN32_REDIST_DIR=$VCINSTALLDIR/redist/x86/Microsoft.VC140.CRT
+    #WIN_UCRT_REDIST_DIR=$UNIVERSALCRTSDKDIR/Redist/$WINDOWSSDKVERSION/ucrt/DLLs/x86
   fi
 else
   _OPTZ="-O2 -msse2 -mfpmath=sse -w"
@@ -72,7 +72,7 @@ else
 fi
 
 if [ "$_APP" != "js" ]; then
-  _APP=apps/$_APP
+  _APP=runtime/xpapps/$_APP
 fi
 
 if [ -n "$_DEBUG" ]; then
@@ -96,6 +96,9 @@ ac_add_options --enable-av1
 ac_add_options --disable-tests
 ac_add_options --disable-necko-wifi
 ac_add_options --disable-parental-controls
+ac_add_options --disable-startupcache
+ac_add_options --disable-precompiled-startupcache
+ac_add_options --disable-jxl
 ac_add_options --enable-chrome-format=omni
 ac_add_options --enable-chrome-compression=none
 
@@ -109,9 +112,9 @@ if [ -n "$_BRANDING" ] && [ "$_APP" != "js" ]; then
     ac_add_options --enable-official-branding
   else
     if [ "$_APP" == "apps/navigator" ]; then
-      ac_add_options --with-branding=other-licenses/branding/borealis
+      ac_add_options --with-branding=other-licenses/branding/borealis/$_BRANDING
     elif [ "$_APP" == "apps/mail" ]; then
-      ac_add_options --with-branding=other-licenses/branding/interlink
+      ac_add_options --with-branding=other-licenses/branding/interlink/$_BRANDING
     else
       ac_add_options --with-branding=$_APP/branding/$_BRANDING
     fi
